@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
-import { MapPin, Clock, Activity, DollarSign, TrendingUp, Settings, Target, Filter, Eye, ArrowUpRight, ChevronLeft } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Area, AreaChart } from "recharts";
+import { MapPin, ChevronLeft, TrendingDown, Filter, ArrowUpDown, Camera, Star } from "lucide-react";
+import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { mineracoes, anuncios } from "@/data/mock";
+
+const fmt = (v: number) => v.toLocaleString("pt-BR");
 
 const Mineracao = () => {
   const { id } = useParams();
@@ -12,186 +14,158 @@ const Mineracao = () => {
 
   return (
     <AppShell>
-      <Link to="/" className="mb-6 inline-flex items-center gap-1.5 font-display text-[13px] font-bold text-muted-foreground transition-smooth hover:text-primary">
-        <ChevronLeft className="h-4 w-4" strokeWidth={2.8} />
-        Voltar para minerações
+      {/* Breadcrumb */}
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-[12.5px] font-extrabold text-muted-foreground hover:text-primary">
+        <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.6} />
+        Minerações
       </Link>
 
-      {/* Hero */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-hero p-10 text-white shadow-elevated grain">
-        <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/30 blur-3xl" />
-        <div className="absolute -bottom-32 -left-10 h-72 w-72 rounded-full bg-primary-glow/40 blur-3xl" />
-
-        <div className="relative">
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 font-display text-[11px] font-extrabold uppercase tracking-[0.18em] backdrop-blur">
-              <Activity className="h-3 w-3 animate-pulse" strokeWidth={3} />
-              Minerando agora
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white/70">
-              <Clock className="h-3.5 w-3.5" strokeWidth={2.6} />
-              Atualizado há {m.atualizadoHa}
-            </div>
-          </div>
-
-          <h1 className="heading-display mb-6 text-[64px] font-extrabold leading-[0.95]">{m.titulo}</h1>
-
-          <div className="flex flex-wrap gap-3">
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 backdrop-blur">
-              <MapPin className="h-4 w-4" strokeWidth={2.6} />
-              <span className="font-display text-[14px] font-bold">{m.cidade}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 backdrop-blur">
-              <DollarSign className="h-4 w-4" strokeWidth={2.6} />
-              <span className="font-display text-[14px] font-bold">R$ {m.precoMin.toLocaleString('pt-BR')} até R$ {m.precoMax.toLocaleString('pt-BR')}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-accent/40 bg-accent/20 px-4 py-2.5 backdrop-blur">
-              <Target className="h-4 w-4 text-accent" strokeWidth={2.6} />
-              <span className="font-display text-[14px] font-bold">Alvo R$ {m.precoAlvo.toLocaleString('pt-BR')}</span>
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
+        <div className="flex gap-4">
+          <img src={m.capa} alt={m.titulo} className="h-20 w-20 shrink-0 rounded-md object-cover" />
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{m.categoria}</div>
+            <h1 className="mt-0.5 font-display text-[26px] font-extrabold leading-tight text-foreground">{m.titulo}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] font-medium text-muted-foreground">
+              <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" strokeWidth={2.4} />{m.cidade}</span>
+              <span>R$ {fmt(m.precoMin)} – R$ {fmt(m.precoMax)}</span>
+              <span className="text-success">Atualizado {m.atualizadoHa}</span>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Stats */}
-      <div className="mb-8 grid gap-5 md:grid-cols-3">
-        <div className="rounded-3xl border border-border bg-card p-7">
-          <div className="mb-4 flex items-center gap-2 text-muted-foreground">
-            <Eye className="h-[18px] w-[18px]" strokeWidth={2.6} />
-            <span className="font-display text-[13px] font-bold">Volume Encontrado</span>
-          </div>
-          <div className="font-display text-[48px] font-extrabold leading-none text-foreground">{m.anuncios}</div>
-          <div className="mt-2 text-[13px] font-semibold text-muted-foreground">anúncios ativos</div>
-          <div className="mt-3 text-[12.5px] text-muted-foreground/80">Baseado nos filtros de busca selecionados.</div>
-        </div>
-
-        <div className="rounded-3xl border border-border bg-card p-7">
-          <div className="mb-4 flex items-center gap-2 text-success">
-            <DollarSign className="h-[18px] w-[18px]" strokeWidth={2.6} />
-            <span className="font-display text-[13px] font-bold">Menor Preço</span>
-          </div>
-          <div className="font-display text-[48px] font-extrabold leading-none text-foreground">
-            R$ {(m.menorPreco / 1000).toFixed(1).replace('.', ',')}<span className="text-[24px] text-muted-foreground">k</span>
-          </div>
-          <div className="mt-2 text-[13px] font-semibold text-muted-foreground">oportunidade mais barata</div>
-          <div className="mt-3 text-[12.5px] text-muted-foreground/80">Encontrada há poucas horas.</div>
-        </div>
-
-        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/5 p-7">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-primary">
-              <TrendingUp className="h-[18px] w-[18px]" strokeWidth={2.6} />
-              <span className="font-display text-[13px] font-bold">Margem Estimada</span>
-            </div>
-            <button className="flex items-center gap-1 text-[12px] font-bold text-primary hover:underline">
-              <Settings className="h-3 w-3" strokeWidth={2.8} />
-              Configurar
-            </button>
-          </div>
-          <div className="font-display text-[48px] font-extrabold leading-none text-primary">+{m.margem}%</div>
-          <div className="mt-2 text-[13px] font-semibold text-muted-foreground">lucro projetado por unidade</div>
-          <Button className="mt-4 h-10 w-full rounded-xl bg-primary font-display text-[13px] font-extrabold">
-            Definir Preço Alvo
+        <div className="flex gap-2">
+          <Button variant="outline" className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">
+            Editar filtros
+          </Button>
+          <Button variant="outline" className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">
+            Pausar
           </Button>
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="mb-8 rounded-3xl border border-border bg-card p-7">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-[20px] font-extrabold text-foreground">Histórico de preço</h2>
-            <p className="mt-1 text-[13px] text-muted-foreground">Menor preço diário nos últimos 7 dias.</p>
+      {/* Stats strip */}
+      <div className="mb-6 grid gap-3 md:grid-cols-4">
+        {[
+          { label: "Anúncios encontrados", value: String(m.anuncios), hint: `+${m.novosHoje} hoje` },
+          { label: "Menor preço", value: `R$ ${fmt(m.menorPreco)}`, hint: "Vila Mariana, SP", accent: true },
+          { label: "Preço alvo", value: `R$ ${fmt(m.precoAlvo)}`, hint: "Definido por você" },
+          { label: "Margem estimada", value: `+${m.margem}%`, hint: `Lucro ~R$ ${fmt(m.precoAlvo - m.menorPreco)}`, success: true },
+        ].map((s) => (
+          <div key={s.label} className="rounded-lg border border-border bg-card p-4">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</div>
+            <div className={`mt-1.5 font-display text-[24px] font-extrabold leading-none price ${
+              s.accent ? "text-accent" : s.success ? "text-success" : "text-foreground"
+            }`}>{s.value}</div>
+            {s.hint && <div className="mt-1.5 text-[11.5px] font-medium text-muted-foreground">{s.hint}</div>}
           </div>
-          <div className="flex gap-2">
+        ))}
+      </div>
+
+      {/* Chart */}
+      <div className="mb-6 rounded-lg border border-border bg-card p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-[15px] font-extrabold text-foreground">Histórico de preço</h2>
+            <p className="text-[12px] text-muted-foreground">Menor preço diário</p>
+          </div>
+          <div className="flex gap-1 rounded-md border border-border p-0.5">
             {["7d", "30d", "90d"].map((p, i) => (
-              <button key={p} className={`rounded-lg px-3 py-1.5 font-display text-[12px] font-bold transition-smooth ${i === 0 ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+              <button
+                key={p}
+                className={`rounded px-2.5 py-1 font-display text-[11.5px] font-extrabold ${
+                  i === 0 ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
                 {p}
               </button>
             ))}
           </div>
         </div>
-        <div className="h-[280px]">
+        <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={m.historico}>
+            <AreaChart data={m.historico} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorPreco" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                <linearGradient id="cp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
                   <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="dia" stroke="hsl(var(--muted-foreground))" fontSize={12} fontWeight={600} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} fontWeight={600} tickFormatter={(v) => `R$${(v / 1000).toFixed(1)}k`} />
+              <XAxis dataKey="dia" stroke="hsl(var(--muted-foreground))" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(1)}k`} />
               <Tooltip
-                contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', fontFamily: 'Sora', fontWeight: 700 }}
-                formatter={(v: number) => [`R$ ${v.toLocaleString('pt-BR')}`, 'Menor preço']}
+                contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))", fontSize: 12, fontWeight: 700 }}
+                formatter={(v: number) => [`R$ ${fmt(v)}`, "Menor preço"]}
               />
-              <Area type="monotone" dataKey="preco" stroke="hsl(var(--primary))" strokeWidth={3} fill="url(#colorPreco)" />
+              <Area type="monotone" dataKey="preco" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#cp)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Results */}
-      <div>
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Resultados encontrados</h2>
-            <p className="mt-1 text-[13px] text-muted-foreground">Selecione um anúncio para ver detalhes completos e análise de lucro.</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="rounded-xl bg-primary/10 px-4 py-2 font-display text-[12.5px] font-extrabold text-primary">Menor Preço</button>
-            <button className="rounded-xl bg-secondary px-4 py-2 font-display text-[12.5px] font-bold text-muted-foreground">Mais Recentes</button>
-            <button className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-display text-[12.5px] font-bold text-foreground">
-              <Filter className="h-3.5 w-3.5" strokeWidth={2.6} />
-              Filtros
-            </button>
-          </div>
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-[18px] font-extrabold text-foreground">{ads.length} resultados encontrados</h2>
+          <p className="text-[12.5px] text-muted-foreground">Ordenados por menor preço</p>
         </div>
+        <div className="flex gap-2">
+          <button className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[12px] font-extrabold text-foreground hover:bg-secondary">
+            <Filter className="h-3.5 w-3.5" strokeWidth={2.4} /> Filtros
+          </button>
+          <button className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[12px] font-extrabold text-foreground hover:bg-secondary">
+            <ArrowUpDown className="h-3.5 w-3.5" strokeWidth={2.4} /> Menor preço
+          </button>
+        </div>
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {ads.map((a) => (
-            <Link
-              key={a.id}
-              to={`/anuncio/${a.id}`}
-              className="group relative overflow-hidden rounded-3xl border border-border bg-card transition-smooth hover:-translate-y-1 hover:border-primary/40 hover:shadow-elegant"
-            >
-              <div className="relative h-48 bg-gradient-to-br from-secondary to-muted overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center font-display text-[60px] font-extrabold text-foreground/10">
-                  {a.plataforma === "OLX" ? "OLX" : "ML"}
-                </div>
-                <div className={`absolute left-4 top-4 rounded-full px-3 py-1 font-display text-[10px] font-extrabold uppercase tracking-wider text-white ${a.plataforma === "OLX" ? "bg-accent" : "bg-warning"}`}>
-                  {a.plataforma}
-                </div>
-                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 font-display text-[11px] font-extrabold text-white backdrop-blur">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                  Score {a.score}
-                </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {ads.map((a) => (
+          <Link
+            key={a.id}
+            to={`/anuncio/${a.id}`}
+            className="group overflow-hidden rounded-lg border border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+              <img src={a.capa} alt={a.titulo} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+              <span className={`absolute left-2 top-2 rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-white ${
+                a.plataforma === "OLX" ? "bg-accent" : "bg-[#fff159] !text-[#2d3277]"
+              }`}>
+                {a.plataforma}
+              </span>
+              {a.destaque === "menor-preco" && (
+                <span className="absolute right-2 top-2 rounded bg-success px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-success-foreground">
+                  Menor preço
+                </span>
+              )}
+              {a.destaque === "queda-preco" && (
+                <span className="absolute right-2 top-2 inline-flex items-center gap-0.5 rounded bg-primary px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-primary-foreground">
+                  <TrendingDown className="h-2.5 w-2.5" strokeWidth={3} />
+                  Caiu
+                </span>
+              )}
+              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded bg-foreground/75 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
+                <Camera className="h-2.5 w-2.5" strokeWidth={3} />
+                {a.fotos}
+              </span>
+            </div>
+            <div className="p-3">
+              {a.precoAntigo && (
+                <div className="text-[11px] font-semibold text-muted-foreground line-through price">R$ {fmt(a.precoAntigo)}</div>
+              )}
+              <div className="font-display text-[20px] font-extrabold leading-none text-foreground price">R$ {fmt(a.preco)}</div>
+              <div className="mt-1 inline-flex items-center gap-0.5 rounded bg-success-soft px-1.5 py-0.5 text-[10.5px] font-extrabold text-success">
+                +R$ {fmt(a.margemEstimada)} · +{a.margemPercentual}%
               </div>
-              <div className="p-5">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="font-display text-[15px] font-extrabold leading-tight text-foreground line-clamp-2">{a.titulo}</h3>
-                  <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-smooth group-hover:text-primary" strokeWidth={2.6} />
-                </div>
-                <div className="mb-3 flex items-center gap-1 text-[12px] font-semibold text-muted-foreground">
-                  <MapPin className="h-3 w-3" strokeWidth={2.6} />
-                  {a.bairro}, {a.cidade}
-                </div>
-                <div className="flex items-end justify-between border-t border-border/60 pt-3">
-                  <div>
-                    <div className="font-display text-[24px] font-extrabold text-foreground">R$ {a.preco.toLocaleString('pt-BR')}</div>
-                    <div className="text-[11px] font-semibold text-muted-foreground">publicado há {a.publicadoHa}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-display text-[16px] font-extrabold text-success">+R$ {a.margemEstimada}</div>
-                    <div className="text-[11px] font-semibold text-success/80">margem +{a.margemPercentual}%</div>
-                  </div>
-                </div>
+              <h3 className="mt-2 line-clamp-2 text-[12.5px] font-semibold leading-snug text-foreground/85">{a.titulo}</h3>
+              <div className="mt-2 flex items-center justify-between text-[10.5px] font-medium text-muted-foreground">
+                <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" strokeWidth={2.6} />{a.bairro}</span>
+                <span className="flex items-center gap-0.5"><Star className="h-2.5 w-2.5 fill-warning text-warning" strokeWidth={2.6} />{a.score}</span>
               </div>
-            </Link>
-          ))}
-        </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </AppShell>
   );
