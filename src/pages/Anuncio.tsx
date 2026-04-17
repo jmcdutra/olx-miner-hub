@@ -1,8 +1,13 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Clock, ExternalLink, Star, TrendingUp, Shield, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, MapPin, Clock, ExternalLink, Star, TrendingUp, Shield, MessageCircle, Heart, GitCompare, Share2, Flag } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { anuncios, mineracoes } from "@/data/mock";
+import { useApp } from "@/context/AppContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR");
 
@@ -10,6 +15,23 @@ const Anuncio = () => {
   const { id } = useParams();
   const a = anuncios.find((x) => x.id === id) ?? anuncios[0];
   const m = mineracoes.find((x) => x.id === a.mineracaoId)!;
+  const { isFavorito, toggleFavorito, isComparando, toggleComparar } = useApp();
+  const [imgIdx, setImgIdx] = useState(0);
+  const [openContact, setOpenContact] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
+
+  const fav = isFavorito(a.id);
+  const cmp = isComparando(a.id);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: a.titulo, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado");
+    }
+  };
 
   return (
     <AppShell>
@@ -24,19 +46,23 @@ const Anuncio = () => {
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         {/* Main */}
         <div>
-          {/* Gallery */}
           <div className="mb-3 overflow-hidden rounded-lg border border-border bg-secondary">
             <img src={a.capa} alt={a.titulo} className="aspect-[4/3] w-full object-cover" />
           </div>
           <div className="mb-6 grid grid-cols-5 gap-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="aspect-square overflow-hidden rounded-md border border-border bg-secondary">
-                <img src={a.capa} alt="" className="h-full w-full object-cover opacity-70" />
-              </div>
+              <button
+                key={i}
+                onClick={() => setImgIdx(i)}
+                className={`aspect-square overflow-hidden rounded-md border bg-secondary transition-all ${
+                  imgIdx === i ? "border-primary ring-1 ring-primary" : "border-border opacity-70 hover:opacity-100"
+                }`}
+              >
+                <img src={a.capa} alt="" className="h-full w-full object-cover" />
+              </button>
             ))}
           </div>
 
-          {/* Title + meta */}
           <div className="mb-2 flex items-center gap-2">
             <span className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
               a.plataforma === "OLX" ? "bg-accent" : "bg-[#fff159] !text-[#2d3277]"
@@ -50,7 +76,38 @@ const Anuncio = () => {
             <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-warning text-warning" strokeWidth={2.4} />Score {a.score}/100</span>
           </div>
 
-          {/* Description */}
+          {/* Actions inline */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => toggleFavorito(a.id, a.titulo)}
+              className={`h-9 gap-1.5 rounded-md font-display text-[12.5px] font-extrabold ${
+                fav ? "border-accent bg-accent-soft text-accent" : "border-border"
+              }`}
+            >
+              <Heart className="h-3.5 w-3.5" strokeWidth={2.4} fill={fav ? "currentColor" : "none"} />
+              {fav ? "Salvo" : "Favoritar"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => toggleComparar(a.id, a.titulo)}
+              className={`h-9 gap-1.5 rounded-md font-display text-[12.5px] font-extrabold ${
+                cmp ? "border-primary bg-primary-soft text-primary" : "border-border"
+              }`}
+            >
+              <GitCompare className="h-3.5 w-3.5" strokeWidth={2.4} />
+              {cmp ? "Comparando" : "Comparar"}
+            </Button>
+            <Button variant="outline" onClick={handleShare} className="h-9 gap-1.5 rounded-md border-border font-display text-[12.5px] font-extrabold">
+              <Share2 className="h-3.5 w-3.5" strokeWidth={2.4} />
+              Compartilhar
+            </Button>
+            <Button variant="ghost" onClick={() => setOpenReport(true)} className="ml-auto h-9 gap-1.5 rounded-md font-display text-[12.5px] font-extrabold text-muted-foreground hover:text-destructive">
+              <Flag className="h-3.5 w-3.5" strokeWidth={2.4} />
+              Denunciar
+            </Button>
+          </div>
+
           <div className="mt-6 rounded-lg border border-border bg-card p-5">
             <h2 className="mb-2 font-display text-[14px] font-extrabold text-foreground">Descrição</h2>
             <p className="text-[13.5px] leading-relaxed text-foreground/80">{a.descricao}</p>
@@ -70,7 +127,6 @@ const Anuncio = () => {
             </dl>
           </div>
 
-          {/* Análise */}
           <div className="mt-6 rounded-lg border border-border bg-card p-5">
             <div className="mb-3 flex items-center gap-2">
               <span className="rounded bg-primary px-1.5 py-0.5 font-display text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground">
@@ -99,7 +155,6 @@ const Anuncio = () => {
         {/* Sidebar */}
         <aside>
           <div className="sticky top-20 space-y-4">
-            {/* Price card */}
             <div className="rounded-lg border border-border bg-card p-5">
               {a.precoAntigo && (
                 <div className="text-[12px] font-semibold text-muted-foreground line-through price">R$ {fmt(a.precoAntigo)}</div>
@@ -125,17 +180,23 @@ const Anuncio = () => {
                 </div>
               </dl>
 
-              <Button className="mt-4 h-10 w-full gap-1.5 rounded-md bg-accent font-display text-[13px] font-extrabold text-accent-foreground hover:bg-accent/90">
+              <Button
+                onClick={() => toast.success("Abrindo no " + a.plataforma + "…")}
+                className="mt-4 h-10 w-full gap-1.5 rounded-md bg-accent font-display text-[13px] font-extrabold text-accent-foreground hover:bg-accent/90"
+              >
                 <ExternalLink className="h-4 w-4" strokeWidth={2.6} />
                 Abrir no {a.plataforma}
               </Button>
-              <Button variant="outline" className="mt-2 h-10 w-full gap-1.5 rounded-md border-border font-display text-[13px] font-extrabold">
+              <Button
+                variant="outline"
+                onClick={() => setOpenContact(true)}
+                className="mt-2 h-10 w-full gap-1.5 rounded-md border-border font-display text-[13px] font-extrabold"
+              >
                 <MessageCircle className="h-4 w-4" strokeWidth={2.6} />
                 Contatar vendedor
               </Button>
             </div>
 
-            {/* Seller */}
             <div className="rounded-lg border border-border bg-card p-4">
               <div className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">Vendedor</div>
               <div className="mt-2 flex items-center gap-3">
@@ -150,23 +211,71 @@ const Anuncio = () => {
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
-                <div>
-                  <div className="font-display text-[14px] font-extrabold text-foreground">4,8</div>
-                  <div className="text-[10px] font-semibold text-muted-foreground">Avaliação</div>
-                </div>
-                <div>
-                  <div className="font-display text-[14px] font-extrabold text-foreground">42</div>
-                  <div className="text-[10px] font-semibold text-muted-foreground">Vendas</div>
-                </div>
-                <div>
-                  <div className="font-display text-[14px] font-extrabold text-foreground">3a</div>
-                  <div className="text-[10px] font-semibold text-muted-foreground">No site</div>
-                </div>
+                <div><div className="font-display text-[14px] font-extrabold text-foreground">4,8</div><div className="text-[10px] font-semibold text-muted-foreground">Avaliação</div></div>
+                <div><div className="font-display text-[14px] font-extrabold text-foreground">42</div><div className="text-[10px] font-semibold text-muted-foreground">Vendas</div></div>
+                <div><div className="font-display text-[14px] font-extrabold text-foreground">3a</div><div className="text-[10px] font-semibold text-muted-foreground">No site</div></div>
               </div>
             </div>
           </div>
         </aside>
       </div>
+
+      {/* Contact modal */}
+      <Dialog open={openContact} onOpenChange={setOpenContact}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-[18px] font-extrabold">Mensagem para {a.vendedor}</DialogTitle>
+            <DialogDescription className="text-[12.5px] text-muted-foreground">
+              A mensagem será enviada via {a.plataforma}.
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            placeholder="Olá! Tenho interesse no anúncio. O preço é negociável?"
+            defaultValue="Olá! Tenho interesse no anúncio. O preço é negociável?"
+            rows={4}
+            className="w-full rounded-md border border-border bg-card p-3 text-[13px] focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setOpenContact(false)} className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Cancelar</Button>
+            <Button
+              onClick={() => { setOpenContact(false); toast.success("Mensagem enviada (demo)"); }}
+              className="h-9 rounded-md bg-primary px-4 font-display text-[12.5px] font-extrabold text-primary-foreground hover:bg-primary/90"
+            >
+              Enviar mensagem
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report modal */}
+      <Dialog open={openReport} onOpenChange={setOpenReport}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-[18px] font-extrabold">Denunciar anúncio</DialogTitle>
+            <DialogDescription className="text-[12.5px] text-muted-foreground">
+              Conte o que está errado. Vamos analisar e ocultar dos seus resultados.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {["Anúncio enganoso", "Preço falso", "Suspeita de golpe", "Produto duplicado", "Outro"].map((opt, i) => (
+              <label key={opt} className="flex cursor-pointer items-center gap-2 rounded-md border border-border bg-card p-2.5 text-[12.5px] font-semibold text-foreground hover:bg-secondary">
+                <input type="radio" name="report" defaultChecked={i === 0} className="h-3.5 w-3.5 accent-primary" />
+                {opt}
+              </label>
+            ))}
+          </div>
+          <Input placeholder="Detalhes (opcional)" className="h-10 rounded-md border-border bg-card font-medium" />
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setOpenReport(false)} className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Cancelar</Button>
+            <Button
+              onClick={() => { setOpenReport(false); toast.success("Denúncia enviada"); }}
+              className="h-9 rounded-md bg-destructive px-4 font-display text-[12.5px] font-extrabold text-destructive-foreground hover:bg-destructive/90"
+            >
+              Enviar denúncia
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 };
