@@ -335,7 +335,7 @@ const Mineracao = () => {
         description="Você perderá o histórico de preços e todos os alertas relacionados. Essa ação não pode ser desfeita."
         confirmLabel="Excluir mineração"
         destructive
-        onConfirm={() => toast.success("Mineração excluída (demo)")}
+        onConfirm={() => { toast.success("Mineração excluída (demo)"); }}
       />
     </AppShell>
   );
