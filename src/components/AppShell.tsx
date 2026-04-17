@@ -10,8 +10,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         <AppSidebar />
         <div className="flex min-h-screen flex-1 flex-col">
           <TopBar />
-          <main className="flex-1 px-8 py-8 lg:px-12 lg:py-10">
-            <div className="mx-auto w-full max-w-[1400px] animate-fade-in">
+          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">
+            <div className="mx-auto w-full max-w-[1280px] animate-fade-in">
               {children}
             </div>
           </main>
