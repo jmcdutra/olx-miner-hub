@@ -181,8 +181,8 @@ const Creditos = () => {
           open={checkout.open}
           onOpenChange={(o) => setCheckout({ ...checkout, open: o })}
           title={`Comprar ${checkout.pacote.qtd} créditos`}
-          description={`${checkout.pacote.qtd}${checkout.pacote.bonus ? ` + ${checkout.pacote.bonus} bônus` : ""} créditos avulsos sem expiração.`}
-          itemLabel={`${checkout.pacote.qtd}${checkout.pacote.bonus ? `+${checkout.pacote.bonus}` : ""} créditos`}
+          description={`${checkout.pacote.qtd} créditos avulsos sem expiração.`}
+          itemLabel={`${checkout.pacote.qtd} créditos`}
           amount={`R$ ${checkout.pacote.preco.toFixed(2).replace(".", ",")}`}
         />
       )}
