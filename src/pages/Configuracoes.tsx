@@ -181,7 +181,7 @@ const Configuracoes = () => {
         title="Sair da conta?"
         description="Você precisará entrar novamente para acessar suas minerações."
         confirmLabel="Sair"
-        onConfirm={() => toast.success("Você saiu da conta (demo)")}
+        onConfirm={() => { toast.success("Você saiu da conta (demo)"); }}
       />
     </AppShell>
   );
