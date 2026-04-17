@@ -87,12 +87,7 @@ const Index = () => {
       <PageHeader
         eyebrow="Suas operações"
         title="Minhas Minerações"
-        description={
-          <>
-            Você tem <span className="font-bold text-primary">{ativas} de 50</span> vagas sendo usadas no plano atual. Continue garimpando oportunidades.
-          </>
-        as any
-        }
+        description={`Você tem ${ativas} de 50 vagas sendo usadas no plano atual. Continue garimpando oportunidades.`}
         actions={
           <Link to="/mineracao/nova">
             <Button className="h-12 gap-2 rounded-2xl bg-primary px-6 font-display text-[14px] font-extrabold text-primary-foreground shadow-md hover:bg-primary-glow">
