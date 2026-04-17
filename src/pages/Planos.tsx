@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { Check, ArrowRight, Calendar, CreditCard } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { planos } from "@/data/mock";
+import { CheckoutModal } from "@/components/modals/CheckoutModal";
+import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
+import { toast } from "sonner";
 
 const Planos = () => {
+  const [upgrade, setUpgrade] = useState<{ open: boolean; plano?: typeof planos[0] }>({ open: false });
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmPayment, setConfirmPayment] = useState(false);
+
   return (
     <AppShell>
-      <PageHeader
-        title="Planos"
-        description="Escolha o plano que combina com seu volume de garimpo."
-      />
+      <PageHeader title="Planos" description="Escolha o plano que combina com seu volume de garimpo." />
 
       <div className="mb-8 grid gap-4 md:grid-cols-3">
         {planos.map((p) => (
@@ -39,6 +44,7 @@ const Planos = () => {
               <span className="font-display text-[40px] font-extrabold leading-none text-foreground price">{p.preco}</span>
               <span className="text-[12px] font-semibold text-muted-foreground">/mês</span>
             </div>
+            <div className="mt-1 text-[11.5px] font-semibold text-muted-foreground">{p.creditos} créditos/mês inclusos</div>
 
             <ul className="mt-5 space-y-2.5">
               {p.features.map((f, i) => (
@@ -51,6 +57,7 @@ const Planos = () => {
 
             <Button
               disabled={p.atual}
+              onClick={() => setUpgrade({ open: true, plano: p })}
               className={`mt-6 h-10 w-full rounded-md font-display text-[13px] font-extrabold ${
                 p.atual
                   ? "bg-secondary text-muted-foreground hover:bg-secondary"
@@ -95,13 +102,44 @@ const Planos = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 border-t border-border px-5 py-4">
-          <Button variant="outline" className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Atualizar pagamento</Button>
-          <Button variant="outline" className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Histórico de faturas</Button>
-          <Button variant="ghost" className="ml-auto h-9 rounded-md text-destructive font-display text-[12.5px] font-extrabold hover:bg-destructive/10">
+          <Button variant="outline" onClick={() => setConfirmPayment(true)} className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Atualizar pagamento</Button>
+          <Button variant="outline" onClick={() => toast("Faturas em breve")} className="h-9 rounded-md border-border font-display text-[12.5px] font-extrabold">Histórico de faturas</Button>
+          <Button variant="ghost" onClick={() => setConfirmCancel(true)} className="ml-auto h-9 rounded-md text-destructive font-display text-[12.5px] font-extrabold hover:bg-destructive/10">
             Cancelar assinatura
           </Button>
         </div>
       </div>
+
+      {upgrade.plano && (
+        <CheckoutModal
+          open={upgrade.open}
+          onOpenChange={(o) => setUpgrade({ ...upgrade, open: o })}
+          title={`Assinar plano ${upgrade.plano.nome}`}
+          description={`${upgrade.plano.creditos} créditos por mês · cobrança recorrente`}
+          itemLabel={`Plano ${upgrade.plano.nome}`}
+          amount={`R$ ${upgrade.plano.preco},00/mês`}
+          ctaLabel="Confirmar assinatura"
+        />
+      )}
+
+      <ConfirmDialog
+        open={confirmCancel}
+        onOpenChange={setConfirmCancel}
+        title="Cancelar assinatura Pro?"
+        description="Você manterá o acesso até 29 abr 2026. Depois disso, suas minerações ativas serão pausadas."
+        confirmLabel="Sim, cancelar"
+        destructive
+        onConfirm={() => { toast.success("Assinatura cancelada", { description: "Acesso mantido até 29/04." }); }}
+      />
+
+      <ConfirmDialog
+        open={confirmPayment}
+        onOpenChange={setConfirmPayment}
+        title="Atualizar forma de pagamento?"
+        description="Você será redirecionada para o portal seguro de pagamento (modo demo)."
+        confirmLabel="Continuar"
+        onConfirm={() => { toast.success("Portal de pagamento aberto (demo)"); }}
+      />
     </AppShell>
   );
 };
