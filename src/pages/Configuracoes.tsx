@@ -173,7 +173,7 @@ const Configuracoes = () => {
         description="Todos os seus dados, minerações, favoritos e histórico serão removidos. Não dá pra desfazer."
         confirmLabel="Sim, excluir minha conta"
         destructive
-        onConfirm={() => toast.success("Conta marcada para exclusão (demo)")}
+        onConfirm={() => { toast.success("Conta marcada para exclusão (demo)"); }}
       />
       <ConfirmDialog
         open={confirmLogout}
