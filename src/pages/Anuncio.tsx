@@ -1,8 +1,10 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Clock, ExternalLink, Phone, Star, TrendingUp, Camera, Shield, Zap, Target } from "lucide-react";
+import { ChevronLeft, MapPin, Clock, ExternalLink, Star, TrendingUp, Shield, MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { anuncios, mineracoes } from "@/data/mock";
+
+const fmt = (v: number) => v.toLocaleString("pt-BR");
 
 const Anuncio = () => {
   const { id } = useParams();
@@ -11,71 +13,83 @@ const Anuncio = () => {
 
   return (
     <AppShell>
-      <Link to={`/mineracao/${m.id}`} className="mb-6 inline-flex items-center gap-1.5 font-display text-[13px] font-bold text-muted-foreground transition-smooth hover:text-primary">
-        <ChevronLeft className="h-4 w-4" strokeWidth={2.8} />
-        Voltar para {m.titulo}
-      </Link>
+      <div className="mb-4 flex items-center gap-1.5 text-[12.5px] font-extrabold text-muted-foreground">
+        <Link to="/" className="hover:text-primary">Minerações</Link>
+        <ChevronLeft className="h-3 w-3 rotate-180" strokeWidth={2.6} />
+        <Link to={`/mineracao/${m.id}`} className="hover:text-primary">{m.titulo}</Link>
+        <ChevronLeft className="h-3 w-3 rotate-180" strokeWidth={2.6} />
+        <span className="text-foreground">Anúncio</span>
+      </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         {/* Main */}
         <div>
           {/* Gallery */}
-          <div className="relative mb-5 overflow-hidden rounded-3xl bg-gradient-to-br from-secondary to-muted aspect-[4/3]">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="font-display text-[140px] font-extrabold text-foreground/10">{a.plataforma === "OLX" ? "OLX" : "ML"}</div>
-            </div>
-            <div className={`absolute left-5 top-5 rounded-full px-4 py-2 font-display text-[12px] font-extrabold uppercase tracking-wider text-white ${a.plataforma === "OLX" ? "bg-accent" : "bg-warning"}`}>
-              {a.plataforma}
-            </div>
-            <div className="absolute bottom-5 right-5 flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 font-display text-[12px] font-extrabold text-white backdrop-blur">
-              <Camera className="h-3.5 w-3.5" strokeWidth={2.6} />
-              {a.fotos} fotos
-            </div>
+          <div className="mb-3 overflow-hidden rounded-lg border border-border bg-secondary">
+            <img src={a.capa} alt={a.titulo} className="aspect-[4/3] w-full object-cover" />
           </div>
-          <div className="mb-8 grid grid-cols-4 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-2xl bg-gradient-to-br from-secondary to-muted" />
+          <div className="mb-6 grid grid-cols-5 gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="aspect-square overflow-hidden rounded-md border border-border bg-secondary">
+                <img src={a.capa} alt="" className="h-full w-full object-cover opacity-70" />
+              </div>
             ))}
           </div>
 
-          {/* Title */}
-          <h1 className="heading-display mb-4 text-[42px] font-extrabold leading-tight text-foreground">{a.titulo}</h1>
-
-          <div className="mb-8 flex flex-wrap items-center gap-4 text-[13px] font-semibold text-muted-foreground">
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" strokeWidth={2.6} />{a.bairro}, {a.cidade}</span>
-            <span className="h-1 w-1 rounded-full bg-border" />
-            <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" strokeWidth={2.6} />Publicado há {a.publicadoHa}</span>
-            <span className="h-1 w-1 rounded-full bg-border" />
-            <span className="flex items-center gap-1.5"><Star className="h-4 w-4 text-warning" fill="currentColor" strokeWidth={2.6} />Score {a.score}/100</span>
+          {/* Title + meta */}
+          <div className="mb-2 flex items-center gap-2">
+            <span className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
+              a.plataforma === "OLX" ? "bg-accent" : "bg-[#fff159] !text-[#2d3277]"
+            }`}>{a.plataforma}</span>
+            <span className="text-[11.5px] font-semibold text-muted-foreground">Cód. {a.id}</span>
+          </div>
+          <h1 className="font-display text-[24px] font-extrabold leading-tight text-foreground md:text-[28px]">{a.titulo}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] font-medium text-muted-foreground">
+            <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" strokeWidth={2.4} />{a.bairro}, {a.cidade}</span>
+            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" strokeWidth={2.4} />Há {a.publicadoHa}</span>
+            <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-warning text-warning" strokeWidth={2.4} />Score {a.score}/100</span>
           </div>
 
           {/* Description */}
-          <div className="mb-8 rounded-3xl border border-border bg-card p-7">
-            <h2 className="mb-3 font-display text-[18px] font-extrabold text-foreground">Descrição do anúncio</h2>
-            <p className="text-[14.5px] leading-relaxed text-muted-foreground">{a.descricao}</p>
+          <div className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="mb-2 font-display text-[14px] font-extrabold text-foreground">Descrição</h2>
+            <p className="text-[13.5px] leading-relaxed text-foreground/80">{a.descricao}</p>
+
+            <h3 className="mt-5 mb-2 font-display text-[13px] font-extrabold uppercase tracking-wider text-muted-foreground">Detalhes</h3>
+            <dl className="grid gap-x-6 gap-y-2 text-[12.5px] sm:grid-cols-2">
+              {[
+                ["Marca", "Apple"], ["Modelo", "iPhone 13 Pro Max"],
+                ["Capacidade", "256GB"], ["Cor", "Grafite"],
+                ["Estado", "Usado — Excelente"], ["Bateria", "95%"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between border-b border-border py-1.5">
+                  <dt className="font-medium text-muted-foreground">{k}</dt>
+                  <dd className="font-extrabold text-foreground">{v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          {/* AI Analysis */}
-          <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/5 p-7">
-            <div className="mb-5 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Zap className="h-4 w-4" strokeWidth={2.8} />
-              </div>
-              <div>
-                <h2 className="font-display text-[18px] font-extrabold text-foreground">Análise inteligente</h2>
-                <p className="text-[12px] font-semibold text-muted-foreground">Avaliação automática do garimpreço</p>
-              </div>
+          {/* Análise */}
+          <div className="mt-6 rounded-lg border border-border bg-card p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="rounded bg-primary px-1.5 py-0.5 font-display text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground">
+                Análise garimpreço
+              </span>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-3">
               {[
-                { icon: Shield, label: "Vendedor confiável", value: "Verificado", color: "text-success" },
-                { icon: TrendingUp, label: "Tendência de preço", value: "Estável", color: "text-primary" },
-                { icon: Target, label: "Tempo médio venda", value: a.vendaRapida, color: "text-accent" },
-              ].map((item, i) => (
-                <div key={i} className="rounded-2xl bg-card p-4">
-                  <item.icon className={`mb-2 h-5 w-5 ${item.color}`} strokeWidth={2.6} />
-                  <div className="font-display text-[15px] font-extrabold text-foreground">{item.value}</div>
-                  <div className="text-[11.5px] font-semibold text-muted-foreground">{item.label}</div>
+                { label: "Vendedor", value: "Verificado", hint: "3 anos no site, 42 vendas", icon: Shield, color: "text-success" },
+                { label: "Tendência", value: "Estável", hint: "Preço consistente em 30d", icon: TrendingUp, color: "text-primary" },
+                { label: "Tempo de venda", value: a.vendaRapida, hint: "Média da categoria", icon: Clock, color: "text-accent" },
+              ].map((it) => (
+                <div key={it.label} className="rounded-md border border-border bg-secondary/40 p-3">
+                  <div className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <it.icon className={`h-3 w-3 ${it.color}`} strokeWidth={2.6} />
+                    {it.label}
+                  </div>
+                  <div className="mt-1 font-display text-[15px] font-extrabold text-foreground">{it.value}</div>
+                  <div className="text-[11px] text-muted-foreground">{it.hint}</div>
                 </div>
               ))}
             </div>
@@ -83,64 +97,69 @@ const Anuncio = () => {
         </div>
 
         {/* Sidebar */}
-        <aside className="space-y-5">
-          {/* Price */}
-          <div className="sticky top-28 space-y-5">
-            <div className="rounded-3xl border border-border bg-card p-7">
-              <div className="mb-1 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Preço anunciado</div>
-              <div className="font-display text-[44px] font-extrabold leading-none text-foreground">
-                R$ {a.preco.toLocaleString('pt-BR')}
+        <aside>
+          <div className="sticky top-20 space-y-4">
+            {/* Price card */}
+            <div className="rounded-lg border border-border bg-card p-5">
+              {a.precoAntigo && (
+                <div className="text-[12px] font-semibold text-muted-foreground line-through price">R$ {fmt(a.precoAntigo)}</div>
+              )}
+              <div className="font-display text-[36px] font-extrabold leading-none text-foreground price">R$ {fmt(a.preco)}</div>
+              <div className="mt-2 inline-flex items-center gap-1 rounded bg-success-soft px-2 py-1 font-display text-[12px] font-extrabold text-success">
+                <TrendingUp className="h-3 w-3" strokeWidth={3} />
+                +R$ {fmt(a.margemEstimada)} de margem · +{a.margemPercentual}%
               </div>
-              <div className="mt-5 space-y-3 border-t border-border/60 pt-5">
-                <div className="flex justify-between text-[13.5px]">
-                  <span className="font-semibold text-muted-foreground">Preço alvo de revenda</span>
-                  <span className="font-display font-extrabold text-foreground">R$ {m.precoAlvo.toLocaleString('pt-BR')}</span>
+
+              <dl className="mt-5 space-y-2 border-t border-border pt-4 text-[12.5px]">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Preço anunciado</dt>
+                  <dd className="font-extrabold text-foreground price">R$ {fmt(a.preco)}</dd>
                 </div>
-                <div className="flex justify-between text-[13.5px]">
-                  <span className="font-semibold text-muted-foreground">Margem estimada</span>
-                  <span className="font-display font-extrabold text-success">+R$ {a.margemEstimada}</span>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Preço alvo (revenda)</dt>
+                  <dd className="font-extrabold text-foreground price">R$ {fmt(m.precoAlvo)}</dd>
                 </div>
-                <div className="flex justify-between text-[13.5px]">
-                  <span className="font-semibold text-muted-foreground">ROI projetado</span>
-                  <span className="font-display font-extrabold text-success">{a.margemPercentual}%</span>
+                <div className="flex justify-between border-t border-border pt-2">
+                  <dt className="font-extrabold text-foreground">Lucro projetado</dt>
+                  <dd className="font-display font-extrabold text-success price">+R$ {fmt(a.margemEstimada)}</dd>
                 </div>
-              </div>
-              <Button className="mt-6 h-12 w-full gap-2 rounded-2xl bg-accent font-display text-[14px] font-extrabold text-accent-foreground shadow-orange hover:bg-accent/90">
-                <ExternalLink className="h-4 w-4" strokeWidth={2.8} />
-                Ver no {a.plataforma}
+              </dl>
+
+              <Button className="mt-4 h-10 w-full gap-1.5 rounded-md bg-accent font-display text-[13px] font-extrabold text-accent-foreground hover:bg-accent/90">
+                <ExternalLink className="h-4 w-4" strokeWidth={2.6} />
+                Abrir no {a.plataforma}
               </Button>
-              <Button variant="outline" className="mt-3 h-12 w-full gap-2 rounded-2xl border-border font-display text-[14px] font-extrabold">
-                <Phone className="h-4 w-4" strokeWidth={2.8} />
+              <Button variant="outline" className="mt-2 h-10 w-full gap-1.5 rounded-md border-border font-display text-[13px] font-extrabold">
+                <MessageCircle className="h-4 w-4" strokeWidth={2.6} />
                 Contatar vendedor
               </Button>
             </div>
 
             {/* Seller */}
-            <div className="rounded-3xl border border-border bg-card p-6">
-              <div className="mb-4 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Vendedor</div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-bold font-display text-[14px] font-extrabold text-white">
-                  {a.vendedor.split(' ').map(n => n[0]).join('')}
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">Vendedor</div>
+              <div className="mt-2 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary font-display text-[12px] font-extrabold text-primary-foreground">
+                  {a.vendedor.split(" ").map((n) => n[0]).join("")}
                 </div>
                 <div>
-                  <div className="font-display text-[15px] font-extrabold text-foreground">{a.vendedor}</div>
-                  <div className="flex items-center gap-1 text-[12px] font-semibold text-success">
-                    <Shield className="h-3 w-3" strokeWidth={2.8} />
-                    Conta verificada
+                  <div className="font-display text-[13.5px] font-extrabold text-foreground">{a.vendedor}</div>
+                  <div className="flex items-center gap-1 text-[11px] font-semibold text-success">
+                    <Shield className="h-3 w-3" strokeWidth={2.6} /> Verificado
                   </div>
                 </div>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-xl bg-secondary p-2.5">
-                  <div className="font-display text-[16px] font-extrabold text-foreground">4.8</div>
+              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
+                <div>
+                  <div className="font-display text-[14px] font-extrabold text-foreground">4,8</div>
                   <div className="text-[10px] font-semibold text-muted-foreground">Avaliação</div>
                 </div>
-                <div className="rounded-xl bg-secondary p-2.5">
-                  <div className="font-display text-[16px] font-extrabold text-foreground">42</div>
+                <div>
+                  <div className="font-display text-[14px] font-extrabold text-foreground">42</div>
                   <div className="text-[10px] font-semibold text-muted-foreground">Vendas</div>
                 </div>
-                <div className="rounded-xl bg-secondary p-2.5">
-                  <div className="font-display text-[16px] font-extrabold text-foreground">3a</div>
+                <div>
+                  <div className="font-display text-[14px] font-extrabold text-foreground">3a</div>
                   <div className="text-[10px] font-semibold text-muted-foreground">No site</div>
                 </div>
               </div>
