@@ -164,7 +164,7 @@ const Configuracoes = () => {
         title="Ativar autenticação em 2 fatores?"
         description="Você precisará escanear um QR code com um app autenticador (Google Authenticator, 1Password, etc)."
         confirmLabel="Ativar 2FA"
-        onConfirm={() => toast.success("2FA ativado (demo)")}
+        onConfirm={() => { toast.success("2FA ativado (demo)"); }}
       />
       <ConfirmDialog
         open={confirmDelete}
@@ -173,7 +173,7 @@ const Configuracoes = () => {
         description="Todos os seus dados, minerações, favoritos e histórico serão removidos. Não dá pra desfazer."
         confirmLabel="Sim, excluir minha conta"
         destructive
-        onConfirm={() => toast.success("Conta marcada para exclusão (demo)")}
+        onConfirm={() => { toast.success("Conta marcada para exclusão (demo)"); }}
       />
       <ConfirmDialog
         open={confirmLogout}
@@ -181,7 +181,7 @@ const Configuracoes = () => {
         title="Sair da conta?"
         description="Você precisará entrar novamente para acessar suas minerações."
         confirmLabel="Sair"
-        onConfirm={() => toast.success("Você saiu da conta (demo)")}
+        onConfirm={() => { toast.success("Você saiu da conta (demo)"); }}
       />
     </AppShell>
   );
