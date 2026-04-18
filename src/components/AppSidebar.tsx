@@ -90,22 +90,12 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar collapsible="icon" className="border-r border-border/40 bg-background/95 backdrop-blur-sm">
-        <SidebarHeader className="h-16 flex items-center border-b border-border/40 px-4">
+        <SidebarHeader className="h-20 flex border-b border-border/40 px-4">
           <Logo />
         </SidebarHeader>
 
         <SidebarContent className="px-3 py-4 custom-scrollbar">
-          
-          <div className="mb-6 px-1">
-            <button
-              type="button"
-              onClick={() => setOpenNova(true)}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[14px] font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90 transition-all active:scale-[0.98]"
-            >
-              <Plus className="h-4.5 w-4.5" strokeWidth={2.5} />
-              Nova mineração
-            </button>
-          </div>
+    
 
           <SidebarGroup>
             <SidebarGroupContent>
@@ -137,6 +127,17 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+        
+          <div className="mb-6 px-1">
+            <button
+              type="button"
+              onClick={() => setOpenNova(true)}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[14px] font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90 transition-all active:scale-[0.98]"
+            >
+              <Plus className="h-4.5 w-4.5" strokeWidth={2.5} />
+              Nova mineração
+            </button>
+          </div>
 
         <SidebarFooter className="p-4 border-t border-border/40">
           <NavLink 
