@@ -14,7 +14,7 @@ interface CheckoutModalProps {
   itemLabel: string;
   amount: string;
   ctaLabel?: string;
-  onSuccess?: () => void;
+  onSuccess?: () => void | Promise<void>;
 }
 
 const inputCls = "h-10 rounded-md border-border bg-card font-medium focus-visible:ring-1 focus-visible:ring-primary";
@@ -35,13 +35,20 @@ export const CheckoutModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onOpenChange(false);
-      toast.success("Pagamento simulado com sucesso", {
-        description: `${itemLabel} adicionado à sua conta (modo demo).`,
-      });
-      onSuccess?.();
+    setTimeout(async () => {
+      try {
+        await onSuccess?.();
+        if (!onSuccess) {
+          toast.success("Pagamento simulado com sucesso", {
+            description: `${itemLabel} adicionado à sua conta (modo demo).`,
+          });
+        }
+        onOpenChange(false);
+      } catch {
+        toast.error("Não foi possível concluir o checkout agora.");
+      } finally {
+        setLoading(false);
+      }
     }, 1000);
   };
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 interface AppContextValue {
@@ -15,10 +16,30 @@ interface AppContextValue {
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
+const FAVORITOS_KEY = "olx-miner-hub:favoritos";
+const COMPARAR_KEY = "olx-miner-hub:comparar";
+
+const readStorage = (key: string) => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [favoritos, setFavoritos] = useState<string[]>([]);
-  const [comparar, setComparar] = useState<string[]>([]);
+  const [favoritos, setFavoritos] = useState<string[]>(() => readStorage(FAVORITOS_KEY));
+  const [comparar, setComparar] = useState<string[]>(() => readStorage(COMPARAR_KEY));
+
+  useEffect(() => {
+    window.localStorage.setItem(FAVORITOS_KEY, JSON.stringify(favoritos));
+  }, [favoritos]);
+
+  useEffect(() => {
+    window.localStorage.setItem(COMPARAR_KEY, JSON.stringify(comparar));
+  }, [comparar]);
 
   const toggleFavorito = useCallback((id: string, titulo?: string) => {
     setFavoritos((prev) => {
@@ -69,6 +90,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApp = () => {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useApp must be used inside AppProvider");

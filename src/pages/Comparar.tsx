@@ -1,32 +1,60 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { GitCompare, X, MapPin, Star, ExternalLink, Trash2, Check, Minus } from "lucide-react";
+import { GitCompare, X, MapPin, Star, ExternalLink, Trash2, Check, Minus, Plus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
+import { InlineErrorState, SectionLoadingState } from "@/components/QueryStates";
 import { Button } from "@/components/ui/button";
-import { anuncios } from "@/data/mock";
 import { useApp } from "@/context/AppContext";
+import { useAnunciosQuery } from "@/hooks/api";
+import { getErrorMessage } from "@/lib/api/get-error-message";
 
-const fmt = (v: number) => v.toLocaleString("pt-BR");
+const fmt = (value: number) => value.toLocaleString("pt-BR");
 
 const Comparar = () => {
   const { comparar, toggleComparar, limparComparar } = useApp();
-  const items = anuncios.filter((a) => comparar.includes(a.id));
+  const { data: anuncios, isLoading, isError, error, refetch } = useAnunciosQuery();
+  const items = (anuncios ?? []).filter((item) => comparar.includes(item.id));
+
+  if (isLoading) {
+    return (
+      <AppShell>
+        <PageHeader title="Comparar Anúncios" description="Adicione até 3 anúncios para comparar métricas lado a lado." />
+        <SectionLoadingState lines={5} />
+      </AppShell>
+    );
+  }
+
+  if (isError) {
+    return (
+      <AppShell>
+        <PageHeader title="Comparar Anúncios" description="Adicione até 3 anúncios para comparar métricas lado a lado." />
+        <InlineErrorState
+          title="Nao foi possivel montar o comparador"
+          description={getErrorMessage(error)}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      </AppShell>
+    );
+  }
 
   if (items.length === 0) {
     return (
       <AppShell>
-        <PageHeader title="Comparar anúncios" description="Adicione até 3 anúncios para comparar lado a lado." />
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-secondary/30 py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-            <GitCompare className="h-6 w-6 text-muted-foreground" strokeWidth={2.2} />
+        <PageHeader title="Comparar Anúncios" description="Adicione até 3 anúncios para comparar métricas lado a lado." />
+        <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-secondary/20 py-24 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary shadow-sm">
+            <GitCompare className="h-7 w-7 text-muted-foreground" strokeWidth={2} />
           </div>
-          <h3 className="mt-4 font-display text-[16px] font-extrabold text-foreground">Comparador vazio</h3>
-          <p className="mt-1 max-w-sm text-[12.5px] text-muted-foreground">
-            Em qualquer anúncio, clique em <span className="font-extrabold text-foreground">Comparar</span> para adicionar aqui.
+          <h3 className="text-lg font-bold text-foreground">O comparador está vazio</h3>
+          <p className="mt-2 max-w-md text-[14px] text-muted-foreground">
+            Navegue pelos anúncios e clique no botão <span className="font-semibold text-foreground">Comparar</span> para adicioná-los a esta visão detalhada.
           </p>
           <Link to="/">
-            <Button className="mt-5 h-9 rounded-md bg-primary px-3.5 font-display text-[12.5px] font-extrabold text-primary-foreground hover:bg-primary/90">
-              Voltar para minerações
+            <Button className="mt-6 h-10 rounded-full bg-primary px-6 text-[13.5px] font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
+              Explorar Anúncios
             </Button>
           </Link>
         </div>
@@ -34,153 +62,163 @@ const Comparar = () => {
     );
   }
 
-  const menorPreco = Math.min(...items.map((i) => i.preco));
-  const maiorMargem = Math.max(...items.map((i) => i.margemPercentual));
-  const maiorScore = Math.max(...items.map((i) => i.score));
+  const menorPreco = Math.min(...items.map((item) => item.preco));
+  const maiorMargem = Math.max(...items.map((item) => item.margemPercentual));
+  const maiorScore = Math.max(...items.map((item) => item.score));
 
-  const rows: { label: string; render: (a: typeof items[0]) => React.ReactNode }[] = [
+  const rows: { label: string; render: (item: (typeof items)[number]) => ReactNode }[] = [
     {
       label: "Preço",
-      render: (a) => (
+      render: (item) => (
         <div>
-          <div className={`font-display text-[22px] font-extrabold price ${a.preco === menorPreco ? "text-success" : "text-foreground"}`}>
-            R$ {fmt(a.preco)}
+          <div className={`text-2xl font-bold tracking-tight ${item.preco === menorPreco ? "text-success" : "text-foreground"}`}>
+            R$ {fmt(item.preco)}
           </div>
-          {a.preco === menorPreco && (
-            <span className="inline-flex items-center gap-0.5 rounded bg-success-soft px-1.5 py-0.5 font-display text-[10px] font-extrabold uppercase text-success">
-              <Check className="h-2.5 w-2.5" strokeWidth={3} /> Menor
+          {item.preco === menorPreco && (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-success">
+              <Check className="h-3 w-3" strokeWidth={2.5} /> Menor Preço
             </span>
           )}
         </div>
       ),
     },
     {
-      label: "Margem estimada",
-      render: (a) => (
-        <div className={`font-display text-[15px] font-extrabold price ${a.margemPercentual === maiorMargem ? "text-success" : "text-foreground"}`}>
-          +{a.margemPercentual}%
-          <div className="mt-0.5 text-[11px] font-semibold text-muted-foreground">+R$ {fmt(a.margemEstimada)}</div>
+      label: "Margem Estimada",
+      render: (item) => (
+        <div>
+          <div className={`text-lg font-bold ${item.margemPercentual === maiorMargem ? "text-success" : "text-foreground"}`}>
+            +{item.margemPercentual}%
+          </div>
+          <div className="mt-0.5 text-[12px] font-medium text-muted-foreground">+ R$ {fmt(item.margemEstimada)} lucro</div>
         </div>
       ),
     },
     {
       label: "Plataforma",
-      render: (a) => (
-        <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
-          a.plataforma === "OLX" ? "bg-accent" : "bg-[#fff159] !text-[#2d3277]"
-        }`}>{a.plataforma}</span>
+      render: (item) => (
+        <span className={`inline-block rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm ${
+          item.plataforma === "OLX" ? "bg-purple-600" : "bg-[#fff159] !text-[#2d3277]"
+        }`}>{item.plataforma}</span>
       ),
     },
     {
       label: "Localização",
-      render: (a) => (
-        <div className="flex items-center gap-1 text-[12.5px] font-semibold text-foreground">
-          <MapPin className="h-3 w-3 text-muted-foreground" strokeWidth={2.4} />
-          {a.bairro}, {a.cidade}
+      render: (item) => (
+        <div className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+          <MapPin className="h-4 w-4 text-muted-foreground" strokeWidth={2} />
+          <span className="line-clamp-1">{item.bairro}, {item.cidade}</span>
         </div>
       ),
     },
     {
-      label: "Score",
-      render: (a) => (
-        <div className={`flex items-center gap-1 font-display text-[14px] font-extrabold ${a.score === maiorScore ? "text-success" : "text-foreground"}`}>
-          <Star className="h-3.5 w-3.5 fill-warning text-warning" strokeWidth={2.4} />
-          {a.score}/100
+      label: "Score do Anúncio",
+      render: (item) => (
+        <div className={`flex items-center gap-1.5 text-[15px] font-bold ${item.score === maiorScore ? "text-success" : "text-foreground"}`}>
+          <Star className="h-4 w-4 fill-warning text-warning" strokeWidth={2} />
+          {item.score}/100
         </div>
       ),
     },
     {
       label: "Vendedor",
-      render: (a) => <div className="text-[12.5px] font-extrabold text-foreground">{a.vendedor}</div>,
+      render: (item) => <div className="text-[13px] font-semibold text-foreground">{item.vendedor}</div>,
     },
     {
       label: "Fotos",
-      render: (a) => <div className="text-[12.5px] font-extrabold text-foreground">{a.fotos}</div>,
+      render: (item) => <div className="text-[13px] font-medium text-foreground">{item.fotos} imagens</div>,
     },
     {
-      label: "Tempo médio venda",
-      render: (a) => <div className="text-[12.5px] font-extrabold text-foreground">{a.vendaRapida}</div>,
+      label: "Tempo de Venda",
+      render: (item) => <div className="text-[13px] font-medium text-foreground">{item.vendaRapida}</div>,
     },
     {
-      label: "Publicado",
-      render: (a) => <div className="text-[12.5px] font-medium text-muted-foreground">há {a.publicadoHa}</div>,
+      label: "Publicação",
+      render: (item) => <div className="text-[13px] font-medium text-muted-foreground">há {item.publicadoHa}</div>,
     },
   ];
 
   return (
     <AppShell>
       <PageHeader
-        title={`Comparar ${items.length} anúncio${items.length > 1 ? "s" : ""}`}
-        description="O melhor de cada métrica está marcado em verde."
-        actions={
-          <Button variant="outline" onClick={limparComparar} className="h-9 gap-1.5 rounded-md border-border font-display text-[12.5px] font-extrabold">
-            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.4} /> Limpar tudo
+        title="Comparação Direta"
+        description="O melhor de cada métrica está destacado em verde."
+        actions={(
+          <Button variant="outline" onClick={limparComparar} className="h-10 gap-2 rounded-full border-border/60 text-[13px] font-semibold transition-colors hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive">
+            <Trash2 className="h-4 w-4" strokeWidth={2} /> Limpar Comparador
           </Button>
-        }
+        )}
       />
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="sticky left-0 z-10 w-44 bg-card px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                Anúncio
-              </th>
-              {items.map((a) => (
-                <th key={a.id} className="min-w-[220px] border-l border-border p-3 text-left align-top">
-                  <div className="relative">
-                    <button
-                      onClick={() => toggleComparar(a.id)}
-                      className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-secondary hover:text-destructive"
-                    >
-                      <X className="h-3.5 w-3.5" strokeWidth={2.4} />
-                    </button>
-                    <Link to={`/anuncio/${a.id}`} className="block">
-                      <img src={a.capa} alt={a.titulo} className="aspect-[4/3] w-full rounded-md object-cover" />
-                      <h3 className="mt-2 line-clamp-2 pr-6 text-[12.5px] font-extrabold leading-snug text-foreground hover:text-primary">{a.titulo}</h3>
+      <div className="mt-2 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm">
+        <div className="custom-scrollbar overflow-x-auto pb-2">
+          <table className="w-full min-w-[800px] border-collapse">
+            <thead>
+              <tr className="border-b border-border/40">
+                <th className="sticky left-0 z-20 w-48 border-r border-border/20 bg-card px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                  Métricas
+                </th>
+                {items.map((item) => (
+                  <th key={item.id} className="min-w-[260px] p-5 text-left align-top">
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => toggleComparar(item.id)}
+                        className="absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border/50 bg-background text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        title="Remover"
+                      >
+                        <X className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      </button>
+                      <Link to={`/anuncio/${item.id}`} className="block overflow-hidden rounded-xl border border-border/40 bg-secondary/10 transition-all hover:border-primary/40 hover:shadow-md">
+                        <img src={item.capa} alt={item.titulo} className="aspect-[4/3] w-full object-cover" />
+                        <div className="p-3">
+                          <h3 className="line-clamp-2 text-[13.5px] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">{item.titulo}</h3>
+                        </div>
+                      </Link>
+                    </div>
+                  </th>
+                ))}
+                {items.length < 3 && (
+                  <th className="min-w-[260px] p-5 text-center align-middle">
+                    <Link to="/" className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/60 bg-secondary/10 p-6 text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-background shadow-sm">
+                        <Plus className="h-5 w-5" />
+                      </div>
+                      <span className="text-[13px] font-semibold">Adicionar Anúncio</span>
                     </Link>
-                  </div>
-                </th>
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {rows.map((row) => (
+                <tr key={row.label} className="transition-colors hover:bg-secondary/10">
+                  <td className="sticky left-0 z-10 border-r border-border/20 bg-card px-5 py-4 text-[12px] font-semibold text-muted-foreground shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                    {row.label}
+                  </td>
+                  {items.map((item) => (
+                    <td key={item.id} className="p-5 align-middle">
+                      {row.render(item)}
+                    </td>
+                  ))}
+                  {items.length < 3 && <td className="p-5 text-center text-muted-foreground/30"><Minus className="mx-auto h-4 w-4" /></td>}
+                </tr>
               ))}
-              {items.length < 3 && (
-                <th className="min-w-[220px] border-l border-dashed border-border p-3 text-center align-middle">
-                  <Link to="/" className="block rounded-md border border-dashed border-border p-6 text-[12px] font-semibold text-muted-foreground hover:border-primary hover:bg-primary-soft hover:text-primary">
-                    + Adicionar mais um
-                  </Link>
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.label} className="border-b border-border last:border-b-0 even:bg-secondary/30">
-                <td className="sticky left-0 z-10 bg-inherit px-4 py-3 text-[11.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                  {row.label}
-                </td>
-                {items.map((a) => (
-                  <td key={a.id} className="border-l border-border p-3 align-middle">
-                    {row.render(a)}
+              <tr>
+                <td className="sticky left-0 z-10 border-r border-border/20 bg-card px-5 py-4 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]" />
+                {items.map((item) => (
+                  <td key={item.id} className="p-5">
+                    <Link to={`/anuncio/${item.id}`}>
+                      <Button className="h-11 w-full gap-2 rounded-xl bg-primary text-[14px] font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
+                        Ver detalhes <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </td>
                 ))}
-                {items.length < 3 && <td className="border-l border-dashed border-border p-3 text-center text-muted-foreground"><Minus className="mx-auto h-3 w-3" strokeWidth={2.4} /></td>}
+                {items.length < 3 && <td className="p-5" />}
               </tr>
-            ))}
-            <tr>
-              <td className="sticky left-0 z-10 bg-card px-4 py-3" />
-              {items.map((a) => (
-                <td key={a.id} className="border-l border-border p-3">
-                  <Link to={`/anuncio/${a.id}`}>
-                    <Button className="h-9 w-full gap-1.5 rounded-md bg-primary font-display text-[12.5px] font-extrabold text-primary-foreground hover:bg-primary/90">
-                      <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.6} />
-                      Ver detalhes
-                    </Button>
-                  </Link>
-                </td>
-              ))}
-              {items.length < 3 && <td className="border-l border-dashed border-border p-3" />}
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </AppShell>
   );

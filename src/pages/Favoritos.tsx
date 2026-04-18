@@ -1,83 +1,114 @@
 import { Link } from "react-router-dom";
-import { Heart, MapPin, Star, GitCompare, Trash2, ShoppingBag } from "lucide-react";
+import { Heart, MapPin, Star, GitCompare, ShoppingBag, Camera, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
+import { InlineErrorState, SectionLoadingState } from "@/components/QueryStates";
 import { Button } from "@/components/ui/button";
-import { anuncios } from "@/data/mock";
 import { useApp } from "@/context/AppContext";
-import { APP_ICONS } from "@/lib/category-icons";
+import { useAnunciosQuery } from "@/hooks/api";
+import { getErrorMessage } from "@/lib/api/get-error-message";
 
-const fmt = (v: number) => v.toLocaleString("pt-BR");
+const fmt = (value: number) => value.toLocaleString("pt-BR");
 
 const Favoritos = () => {
   const { favoritos, toggleFavorito, toggleComparar, isComparando } = useApp();
-  const items = anuncios.filter((a) => favoritos.includes(a.id));
+  const { data: anuncios, isLoading, isError, error, refetch } = useAnunciosQuery();
+  const items = (anuncios ?? []).filter((item) => favoritos.includes(item.id));
 
   return (
     <AppShell>
       <PageHeader
-        title="Favoritos"
-        description={`${items.length} ${items.length === 1 ? "anúncio salvo" : "anúncios salvos"} para acompanhar.`}
+        title="Anúncios Salvos"
+        description={`Você possui ${items.length} ${items.length === 1 ? "oportunidade monitorada" : "oportunidades monitoradas"}.`}
       />
 
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-secondary/30 py-20 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card p-3 shadow-sm">
-            <img src={APP_ICONS.favoritos} alt="Favoritos" className="h-full w-full object-contain" loading="lazy" />
+      {isLoading ? (
+        <SectionLoadingState lines={4} />
+      ) : isError ? (
+        <InlineErrorState
+          title="Nao foi possivel carregar os favoritos"
+          description={getErrorMessage(error)}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      ) : items.length === 0 ? (
+        <div className="mt-4 flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-secondary/10 py-24 text-center">
+          <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-border/50 bg-background shadow-sm">
+            <Heart className="h-8 w-8 text-muted-foreground/50" />
+            <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary shadow-sm">
+              <span className="text-[16px]">⭐</span>
+            </div>
           </div>
-          <h3 className="mt-4 font-display text-[16px] font-extrabold text-foreground">Nenhum favorito ainda</h3>
-          <p className="mt-1 max-w-sm text-[12.5px] text-muted-foreground">
-            Toque no coração ♥ em qualquer anúncio para salvá-lo aqui e receber alertas de mudança de preço.
+          <h3 className="text-[18px] font-bold text-foreground">Nenhum favorito salvo</h3>
+          <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-muted-foreground">
+            Ao explorar anúncios, clique no ícone de <strong className="text-foreground">Coração</strong> para salvá-los aqui e acompanhar quedas de preço facilmente.
           </p>
           <Link to="/">
-            <Button className="mt-5 h-9 gap-1.5 rounded-md bg-primary px-3.5 font-display text-[12.5px] font-extrabold text-primary-foreground hover:bg-primary/90">
-              <ShoppingBag className="h-3.5 w-3.5" strokeWidth={2.6} />
-              Ver minhas minerações
+            <Button className="mt-6 h-11 gap-2 rounded-full bg-primary px-6 text-[14px] font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90">
+              <ShoppingBag className="h-4 w-4" />
+              Explorar Minerações
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((a) => {
-            const cmp = isComparando(a.id);
+        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map((item) => {
+            const cmp = isComparando(item.id);
+
             return (
-              <div key={a.id} className="group overflow-hidden rounded-lg border border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <Link to={`/anuncio/${a.id}`} className="block">
+              <div key={item.id} className="group flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
+                <Link to={`/anuncio/${item.id}`} className="relative block flex-1">
                   <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-                    <img src={a.capa} alt={a.titulo} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
-                    <span className={`absolute left-2 top-2 rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-white ${
-                      a.plataforma === "OLX" ? "bg-accent" : "bg-[#fff159] !text-[#2d3277]"
-                    }`}>{a.plataforma}</span>
+                    <img src={item.capa} alt={item.titulo} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                    <span className={`absolute left-3 top-3 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-md ${
+                      item.plataforma === "OLX" ? "bg-purple-600/90" : "bg-[#fff159]/90 !text-[#2d3277]"
+                    }`}>
+                      {item.plataforma}
+                    </span>
+
+                    <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[11px] font-bold text-foreground shadow-sm backdrop-blur-md">
+                      <Camera className="h-3.5 w-3.5 text-muted-foreground" /> {item.fotos}
+                    </span>
                   </div>
-                  <div className="p-3">
-                    <div className="font-display text-[20px] font-extrabold leading-none text-foreground price">R$ {fmt(a.preco)}</div>
-                    <div className="mt-1 inline-flex items-center gap-0.5 rounded bg-success-soft px-1.5 py-0.5 text-[10.5px] font-extrabold text-success">
-                      +{a.margemPercentual}%
+
+                  <div className="flex h-full flex-col p-4">
+                    <div className="mb-2 flex items-end justify-between">
+                      <div className="text-2xl font-bold tracking-tight text-foreground">R$ {fmt(item.preco)}</div>
                     </div>
-                    <h3 className="mt-2 line-clamp-2 text-[12.5px] font-semibold leading-snug text-foreground/85">{a.titulo}</h3>
-                    <div className="mt-2 flex items-center justify-between text-[10.5px] font-medium text-muted-foreground">
-                      <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" strokeWidth={2.6} />{a.bairro}</span>
-                      <span className="flex items-center gap-0.5"><Star className="h-2.5 w-2.5 fill-warning text-warning" strokeWidth={2.6} />{a.score}</span>
+
+                    <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-success/20 bg-success/10 px-2.5 py-1 text-[11px] font-bold text-success">
+                      <TrendingUp className="h-3.5 w-3.5" /> +{item.margemPercentual}% de Margem
+                    </div>
+
+                    <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground/90 transition-colors group-hover:text-primary">{item.titulo}</h3>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-[12px] font-medium text-muted-foreground">
+                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> <span className="max-w-[100px] truncate">{item.bairro}</span></span>
+                      <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-warning text-warning" /> {item.score}</span>
                     </div>
                   </div>
                 </Link>
-                <div className="flex border-t border-border">
+
+                <div className="grid grid-cols-[1fr_auto] border-t border-border/40 bg-secondary/10">
                   <button
-                    onClick={() => toggleComparar(a.id, a.titulo)}
-                    className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-[11.5px] font-extrabold transition-colors ${
-                      cmp ? "bg-primary-soft text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    type="button"
+                    onClick={() => toggleComparar(item.id, item.titulo)}
+                    className={`flex items-center justify-center gap-2 py-3 text-[12px] font-bold transition-colors ${
+                      cmp ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     }`}
                   >
-                    <GitCompare className="h-3 w-3" strokeWidth={2.4} />
-                    {cmp ? "No comparador" : "Comparar"}
+                    <GitCompare className="h-4 w-4" />
+                    {cmp ? "No Comparador" : "Comparar"}
                   </button>
-                  <div className="w-px bg-border" />
+                  <div className="w-px bg-border/40" />
                   <button
-                    onClick={() => toggleFavorito(a.id, a.titulo)}
-                    className="flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    aria-label="Remover dos favoritos"
+                    type="button"
+                    onClick={() => toggleFavorito(item.id, item.titulo)}
+                    className="flex w-14 items-center justify-center text-destructive/70 transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    title="Remover dos Favoritos"
                   >
-                    <Trash2 className="h-3.5 w-3.5" strokeWidth={2.4} />
+                    <Heart className="h-4 w-4" fill="currentColor" />
                   </button>
                 </div>
               </div>
