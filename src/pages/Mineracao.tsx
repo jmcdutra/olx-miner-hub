@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { mineracoes, anuncios } from "@/data/mock";
 import { useApp } from "@/context/AppContext";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR");
 
@@ -27,6 +28,7 @@ const Mineracao = () => {
   });
 
   const { isFavorito, toggleFavorito, isComparando, toggleComparar } = useApp();
+  const categoryIcon = getCategoryIcon(m.categoria);
 
   const allAds = anuncios.filter((a) => a.mineracaoId === m.id);
   const ads = allAds
@@ -55,7 +57,9 @@ const Mineracao = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-start md:justify-between">
         <div className="flex gap-4">
-          <img src={m.capa} alt={m.titulo} className="h-20 w-20 shrink-0 rounded-md object-cover" />
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.18),_transparent_60%),linear-gradient(180deg,_hsl(var(--secondary)),_hsl(var(--card)))] p-3 shadow-sm">
+            <img src={categoryIcon} alt={m.categoria} className="h-full w-full object-contain" loading="lazy" />
+          </div>
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{m.categoria}</div>
             <h1 className="mt-0.5 font-display text-[26px] font-extrabold leading-tight text-foreground">{m.titulo}</h1>

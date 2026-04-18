@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { mineracoes as mineracoesMock } from "@/data/mock";
 import { NovaMineracaoModal } from "@/components/modals/NovaMineracaoModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR");
 
@@ -30,10 +31,11 @@ const MineracaoCard = ({
   onDelete: (id: string) => void;
 }) => {
   const ativa = m.status === "ativo";
+  const categoryIcon = getCategoryIcon(m.categoria);
   return (
     <div className="group relative flex gap-4 rounded-lg border border-border bg-card p-3 transition-all hover:border-primary/40 hover:shadow-sm">
-      <Link to={`/mineracao/${m.id}`} className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md bg-secondary">
-        <img src={m.capa} alt={m.titulo} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+      <Link to={`/mineracao/${m.id}`} className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md border border-primary/10 bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.16),_transparent_58%),linear-gradient(180deg,_hsl(var(--secondary)),_hsl(var(--card)))] p-3">
+        <img src={categoryIcon} alt={m.categoria} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" />
         {!ativa && (
           <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
             <Pause className="h-5 w-5 text-white" strokeWidth={3} fill="white" />

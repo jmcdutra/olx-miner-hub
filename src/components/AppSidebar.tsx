@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Pickaxe, Coins, CreditCard, Bell, Settings, BarChart3, Plus, Heart, GitCompare } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import {
   Sidebar,
@@ -16,6 +16,7 @@ import {
 import { Logo } from "./Logo";
 import { useApp } from "@/context/AppContext";
 import { NovaMineracaoModal } from "./modals/NovaMineracaoModal";
+import { APP_ICONS } from "@/lib/category-icons";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -25,23 +26,31 @@ export function AppSidebar() {
   const isActive = (path: string) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   const main = [
-    { title: "Minerações", url: "/", icon: Pickaxe, badge: "4" },
-    { title: "Insights", url: "/insights", icon: BarChart3 },
-    { title: "Notificações", url: "/notificacoes", icon: Bell, dot: true },
+    { title: "Minerações", url: "/", imageSrc: APP_ICONS.mineracoes, badge: "4" },
+    { title: "Insights", url: "/insights", imageSrc: "/images/eletro.png" },
+    { title: "Notificações", url: "/notificacoes", imageSrc: "/images/cameras.png", dot: true },
   ];
 
   const secundario = [
-    { title: "Favoritos", url: "/favoritos", icon: Heart, badge: favoritos.length || undefined },
-    { title: "Comparador", url: "/comparar", icon: GitCompare, badge: comparar.length || undefined },
+    { title: "Favoritos", url: "/favoritos", imageSrc: APP_ICONS.favoritos, badge: favoritos.length || undefined },
+    { title: "Comparador", url: "/comparar", imageSrc: "/images/autos.png", badge: comparar.length || undefined },
   ];
 
   const conta = [
-    { title: "Créditos", url: "/creditos", icon: Coins, badge: "46" },
-    { title: "Planos", url: "/planos", icon: CreditCard },
-    { title: "Configurações", url: "/configuracoes", icon: Settings },
+    { title: "Créditos", url: "/creditos", imageSrc: APP_ICONS.creditos, badge: "46" },
+    { title: "Planos", url: "/planos", imageSrc: "/images/comercio.png" },
+    { title: "Configurações", url: "/configuracoes", imageSrc: "/images/default.png" },
   ];
 
-  const renderItem = (item: any) => {
+  type SidebarItem = {
+    title: string;
+    url: string;
+    imageSrc: string;
+    badge?: number | string;
+    dot?: boolean;
+  };
+
+  const renderItem = (item: SidebarItem) => {
     const active = isActive(item.url);
     return (
       <SidebarMenuItem key={item.title}>
@@ -54,10 +63,9 @@ export function AppSidebar() {
           }`}
         >
           <NavLink to={item.url}>
-            <item.icon
-              className={`h-4 w-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}
-              strokeWidth={2.2}
-            />
+            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${active ? "bg-primary/10" : "bg-secondary/70"}`}>
+              <img src={item.imageSrc} alt="" className="h-4 w-4 object-contain" loading="lazy" />
+            </span>
             <span>{item.title}</span>
             {item.badge !== undefined && item.badge !== 0 && (
               <span className={`ml-auto rounded px-1.5 py-0.5 font-display text-[10.5px] font-extrabold tabular ${

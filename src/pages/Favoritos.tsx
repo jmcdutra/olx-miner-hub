@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { anuncios } from "@/data/mock";
 import { useApp } from "@/context/AppContext";
+import { APP_ICONS } from "@/lib/category-icons";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR");
 
@@ -21,8 +22,8 @@ const Favoritos = () => {
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-secondary/30 py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-            <Heart className="h-6 w-6 text-muted-foreground" strokeWidth={2.2} />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card p-3 shadow-sm">
+            <img src={APP_ICONS.favoritos} alt="Favoritos" className="h-full w-full object-contain" loading="lazy" />
           </div>
           <h3 className="mt-4 font-display text-[16px] font-extrabold text-foreground">Nenhum favorito ainda</h3>
           <p className="mt-1 max-w-sm text-[12.5px] text-muted-foreground">

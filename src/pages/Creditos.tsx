@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { movimentacoes, mineracoes } from "@/data/mock";
 import { CheckoutModal } from "@/components/modals/CheckoutModal";
+import { APP_ICONS } from "@/lib/category-icons";
 
 const Creditos = () => {
   const [checkout, setCheckout] = useState<{ open: boolean; pacote?: { qtd: number; preco: number } }>({ open: false });
@@ -34,7 +35,11 @@ const Creditos = () => {
       <div className="mb-6 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <div className="rounded-lg border border-border bg-card p-6">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="flex items-start gap-4">
+              <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.18),_transparent_60%),linear-gradient(180deg,_hsl(var(--secondary)),_hsl(var(--card)))] p-3 shadow-sm sm:flex">
+                <img src={APP_ICONS.creditos} alt="Créditos" className="h-full w-full object-contain" loading="lazy" />
+              </div>
+              <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Disponível para uso</div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-display text-[56px] font-extrabold leading-none text-foreground price">{totalDisponivel}</span>
@@ -43,6 +48,7 @@ const Creditos = () => {
               <div className="mt-2 text-[12.5px] text-muted-foreground">
                 {ativas} em uso · {totalDisponivel} prontos para novas minerações
               </div>
+            </div>
             </div>
             <Button
               onClick={() => setCheckout({ open: true, pacote: pacotes[1] })}
@@ -85,8 +91,8 @@ const Creditos = () => {
         {/* Como funciona */}
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary-soft text-primary">
-              <Info className="h-4 w-4" strokeWidth={2.4} />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-soft">
+              <img src={APP_ICONS.creditos} alt="" className="h-5 w-5 object-contain" loading="lazy" />
             </div>
             <h3 className="font-display text-[14px] font-extrabold text-foreground">Como funciona</h3>
           </div>

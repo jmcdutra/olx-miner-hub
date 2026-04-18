@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { mineracoes, anuncios } from "@/data/mock";
 import { useApp } from "@/context/AppContext";
+import { APP_ICONS, getCategoryIcon } from "@/lib/category-icons";
 
 export const TopBar = () => {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ export const TopBar = () => {
                     onClick={() => { setOpenSearch(false); setQuery(""); }}
                     className="flex items-center gap-3 px-3 py-2 hover:bg-secondary"
                   >
-                    <img src={m.capa} alt="" className="h-8 w-8 rounded object-cover" />
+                    <img src={getCategoryIcon(m.categoria)} alt="" className="h-8 w-8 rounded-lg object-contain bg-secondary/70 p-1" loading="lazy" />
                     <div className="flex-1 min-w-0">
                       <div className="truncate font-display text-[13px] font-extrabold text-foreground">{m.titulo}</div>
                       <div className="text-[11px] text-muted-foreground">{m.categoria} · {m.cidade}</div>
@@ -108,7 +109,7 @@ export const TopBar = () => {
           onClick={() => navigate('/creditos')}
           className="hidden h-9 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-[12px] font-extrabold text-foreground transition-colors hover:bg-secondary md:flex"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          <img src={APP_ICONS.creditos} alt="" className="h-4 w-4 object-contain" loading="lazy" />
           <span className="tabular">46</span>
           <span className="font-semibold text-muted-foreground">créditos</span>
         </button>
